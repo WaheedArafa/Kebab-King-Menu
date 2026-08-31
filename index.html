@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kebab King — Menu</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0f0f0f;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ===== LANDING SCREEN ===== */
+    #landing {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0f0f0f;
+      z-index: 100;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    #landing.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .landing-title {
+      color: #e8e8e8;
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 3rem;
+      opacity: 0.7;
+    }
+
+    .lang-btn {
+      width: 220px;
+      padding: 1.2rem 2rem;
+      margin: 0.6rem 0;
+      font-size: 1.3rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      border: 2px solid #444;
+      border-radius: 12px;
+      background: transparent;
+      color: #e8e8e8;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      touch-action: manipulation;
+    }
+    .lang-btn:active {
+      transform: scale(0.96);
+      background: #333;
+    }
+    .lang-btn:hover {
+      border-color: #888;
+      background: #1f1f1f;
+    }
+
+    /* ===== MENU GALLERY ===== */
+    #gallery-wrap {
+      position: fixed;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      background: #0f0f0f;
+    }
+    #gallery-wrap.active {
+      display: flex;
+    }
+
+    /* Top bar */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 1rem;
+      background: #0f0f0f;
+      border-bottom: 1px solid #222;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .menu-label {
+      color: #888;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .change-lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      color: #aaa;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .change-lang-btn:active {
+      background: #2a2a2a;
+    }
+    .change-lang-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: #aaa;
+    }
+
+    /* Scroll container */
+    .scroll-container {
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      display: flex;
+      scrollbar-width: none;
+    }
+    .scroll-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .menu-page {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      scroll-snap-align: start;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      position: relative;
+    }
+
+    .menu-page img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 6px;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* Loading spinner */
+    .spinner-wrap {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #333;
+      border-top-color: #888;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Pagination dots */
+    .dots-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1rem;
+      background: #0f0f0f;
+      border-top: 1px solid #222;
+      flex-shrink: 0;
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #444;
+      transition: background 0.3s ease, transform 0.3s ease;
+      flex-shrink: 0;
+    }
+    .dot.active {
+      background: #e8e8e8;
+      transform: scale(1.3);
+    }
+
+    /* Swipe hint */
+    .swipe-hint {
+      position: absolute;
+      bottom: 3.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #666;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      pointer-events: none;
+      animation: fadeHint 3s ease forwards;
+      animation-delay: 0.5s;
+      opacity: 0;
+    }
+    .swipe-hint svg {
+      width: 18px;
+      height: 18px;
+      fill: #666;
+      animation: swipeArrow 1.8s ease-in-out infinite;
+    }
+    @keyframes fadeHint {
+      0% { opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+    @keyframes swipeArrow {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(6px); }
+    }
+  </style>
+<base target="_blank">
+</head>
+<body>
+
+  <!-- ===== LANGUAGE SELECTION ===== -->
+  <div id="landing">
+    <div class="landing-title">Velg språk / Choose language</div>
+    <button class="lang-btn" data-lang="no" onclick="selectLang('no')">🇳🇴 Norsk</button>
+    <button class="lang-btn" data-lang="en" onclick="selectLang('en')">🇬🇧 English</button>
+  </div>
+
+  <!-- ===== MENU GALLERY ===== -->
+  <div id="gallery-wrap">
+    <div class="top-bar">
+      <span class="menu-label" id="menu-label">Menu</span>
+      <button class="change-lang-btn" onclick="backToLanding()">
+        <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62A7.95 7.95 0 0 1 20 10h-2c-.73 0-1.43.1-2.1.28L14.5 8h-2z"/></svg>
+        <span id="change-lang-text">Change</span>
+      </button>
+    </div>
+
+    <div class="scroll-container" id="scroll-container">
+      <!-- Images injected here -->
+    </div>
+
+    <div class="dots-bar" id="dots-bar"></div>
+    <div class="swipe-hint" id="swipe-hint">
+      <span>Swipe</span>
+      <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    //  IMAGE MANIFEST — matched to your folder structure
+    // ============================================================
+    const MENU_IMAGES = {
+      no: [
+        "downloaded/norwegian/1.png",
+        "downloaded/norwegian/2.png",
+        "downloaded/norwegian/3.png",
+        "downloaded/norwegian/4.png",
+        "downloaded/norwegian/5.png"
+      ],
+      en: [
+        "downloaded/english/1.png",
+        "downloaded/english/2.png",
+        "downloaded/english/3.png",
+        "downloaded/english/4.png",
+        "downloaded/english/5.png"
+      ]
+    };
+
+    const LABELS = {
+      no: { menu: 'Meny', change: 'Bytt språk' },
+      en: { menu: 'Menu', change: 'Change language' }
+    };
+
+    let currentLang = null;
+
+    function selectLang(lang) {
+      currentLang = lang;
+      document.getElementById('landing').classList.add('hidden');
+      document.getElementById('gallery-wrap').classList.add('active');
+      document.getElementById('menu-label').textContent = LABELS[lang].menu;
+      document.getElementById('change-lang-text').textContent = LABELS[lang].change;
+      loadGallery(lang);
+    }
+
+    function backToLanding() {
+      document.getElementById('landing').classList.remove('hidden');
+      document.getElementById('gallery-wrap').classList.remove('active');
+      document.getElementById('scroll-container').innerHTML = '';
+      document.getElementById('dots-bar').innerHTML = '';
+      currentLang = null;
+    }
+
+    function loadGallery(lang) {
+      const container = document.getElementById('scroll-container');
+      const dotsBar = document.getElementById('dots-bar');
+      container.innerHTML = '';
+      dotsBar.innerHTML = '';
+
+      const images = MENU_IMAGES[lang] || [];
+
+      if (images.length === 0) {
+        container.innerHTML = `<div style="color:#666;text-align:center;padding:2rem;width:100%;">No images found.</div>`;
+        return;
+      }
+
+      images.forEach((src, idx) => {
+        const page = document.createElement('div');
+        page.className = 'menu-page';
+
+        // Spinner overlay
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner-wrap';
+        spinner.id = `spinner-${idx}`;
+        spinner.innerHTML = '<div class="spinner"></div>';
+        page.appendChild(spinner);
+
+        // Image — loaded immediately (no lazy loading, avoids observer bugs)
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = `Menu page ${idx + 1}`;
+        img.style.opacity = '0';
+        img.style.transition = 'opacity 0.3s ease';
+
+        img.onload = () => {
+          img.style.opacity = '1';
+          const s = document.getElementById(`spinner-${idx}`);
+          if (s) s.style.display = 'none';
+        };
+        img.onerror = () => {
+          const s = document.getElementById(`spinner-${idx}`);
+          if (s) s.innerHTML = '<span style="color:#555;font-size:0.85rem;">Failed to load</span>';
+        };
+
+        page.appendChild(img);
+        container.appendChild(page);
+
+        // Dot
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (idx === 0 ? ' active' : '');
+        dot.dataset.index = idx;
+        dotsBar.appendChild(dot);
+      });
+
+      // Scroll listener for dots
+      container.addEventListener('scroll', updateDots, { passive: true });
+      updateDots();
+    }
+
+    function updateDots() {
+      const container = document.getElementById('scroll-container');
+      const dots = document.querySelectorAll('.dot');
+      const pages = container.querySelectorAll('.menu-page');
+      if (!pages.length) return;
+
+      const scrollLeft = container.scrollLeft;
+      const pageWidth = container.clientWidth;
+      const activeIndex = Math.round(scrollLeft / pageWidth);
+
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === activeIndex);
+      });
+    }
+
+    // Keyboard nav (desktop testing)
+    document.addEventListener('keydown', (e) => {
+      if (!currentLang) return;
+      const container = document.getElementById('scroll-container');
+      if (e.key === 'ArrowRight') container.scrollBy({ left: container.clientWidth, behavior: 'smooth' });
+      if (e.key === 'ArrowLeft') container.scrollBy({ left: -container.clientWidth, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>

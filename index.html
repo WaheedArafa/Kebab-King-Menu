@@ -97,26 +97,43 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
     }
-    .change-lang-btn {
+    .top-bar-actions {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.4rem 0.8rem;
-      font-size: 0.8rem;
+      gap: 0.5rem;
+    }
+    .top-bar-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.7rem;
+      font-size: 0.78rem;
       color: #aaa;
       background: #1a1a1a;
       border: 1px solid #333;
       border-radius: 8px;
       cursor: pointer;
       touch-action: manipulation;
+      text-decoration: none;
     }
-    .change-lang-btn:active {
+    .top-bar-btn:active {
       background: #2a2a2a;
     }
-    .change-lang-btn svg {
+    .top-bar-btn svg {
       width: 14px;
       height: 14px;
       fill: #aaa;
+      flex-shrink: 0;
+    }
+    .review-btn svg {
+      fill: #f4b400;
+    }
+    .review-btn {
+      color: #f4b400;
+      border-color: #443311;
+    }
+    .review-btn:active {
+      background: #2a2211;
     }
 
     /* Scroll container */
@@ -250,10 +267,16 @@
   <div id="gallery-wrap">
     <div class="top-bar">
       <span class="menu-label" id="menu-label">Menu</span>
-      <button class="change-lang-btn" onclick="backToLanding()">
-        <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62A7.95 7.95 0 0 1 20 10h-2c-.73 0-1.43.1-2.1.28L14.5 8h-2z"/></svg>
-        <span id="change-lang-text">Change</span>
-      </button>
+      <div class="top-bar-actions">
+        <a class="top-bar-btn review-btn" href="https://maps.app.goo.gl/nf9QeidouLum9gLu8" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          <span>Review</span>
+        </a>
+        <button class="top-bar-btn" onclick="backToLanding()">
+          <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62A7.95 7.95 0 0 1 20 10h-2c-.73 0-1.43.1-2.1.28L14.5 8h-2z"/></svg>
+          <span id="change-lang-text">Change</span>
+        </button>
+      </div>
     </div>
 
     <div class="scroll-container" id="scroll-container">
@@ -269,7 +292,7 @@
 
   <script>
     // ============================================================
-    //  IMAGE MANIFEST — matched to your folder structure
+    //  IMAGE MANIFEST
     // ============================================================
     const MENU_IMAGES = {
       no: [
@@ -329,14 +352,12 @@
         const page = document.createElement('div');
         page.className = 'menu-page';
 
-        // Spinner overlay
         const spinner = document.createElement('div');
         spinner.className = 'spinner-wrap';
         spinner.id = `spinner-${idx}`;
         spinner.innerHTML = '<div class="spinner"></div>';
         page.appendChild(spinner);
 
-        // Image — loaded immediately (no lazy loading, avoids observer bugs)
         const img = document.createElement('img');
         img.src = src;
         img.alt = `Menu page ${idx + 1}`;
@@ -356,14 +377,12 @@
         page.appendChild(img);
         container.appendChild(page);
 
-        // Dot
         const dot = document.createElement('div');
         dot.className = 'dot' + (idx === 0 ? ' active' : '');
         dot.dataset.index = idx;
         dotsBar.appendChild(dot);
       });
 
-      // Scroll listener for dots
       container.addEventListener('scroll', updateDots, { passive: true });
       updateDots();
     }
@@ -383,7 +402,6 @@
       });
     }
 
-    // Keyboard nav (desktop testing)
     document.addEventListener('keydown', (e) => {
       if (!currentLang) return;
       const container = document.getElementById('scroll-container');
